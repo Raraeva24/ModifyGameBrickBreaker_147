@@ -169,19 +169,18 @@ class Game(tk.Frame):
             self.add_brick(x + 37.5, 70, 2)
             self.add_brick(x + 37.5, 90, 1)
 
-        self.hud = None
+        self.hud_lives = None
+        self.hud_score = None
         self.setup_game()
         self.canvas.focus_set()
-        self.canvas.bind('<Left>',
-                         lambda _: self.paddle.move(-10))
-        self.canvas.bind('<Right>',
-                         lambda _: self.paddle.move(10))
+        self.canvas.bind('<Left>', lambda _: self.paddle.move(-10))
+        self.canvas.bind('<Right>', lambda _: self.paddle.move(10))
+
 
     def setup_game(self):
            self.add_ball()
            self.update_lives_text()
-           self.text = self.draw_text(300, 200,
-                                      'Press Space to start')
+           self.text = self.draw_text(300, 200,'Press Space to start')
            self.canvas.bind('<space>', lambda _: self.start_game())
 
     def add_ball(self):
@@ -197,16 +196,19 @@ class Game(tk.Frame):
         self.items[brick.item] = brick
 
     def draw_text(self, x, y, text, size='40'):
-        font = ('Forte', size)
+        font = ('Small Fonts', size)
         return self.canvas.create_text(x, y, text=text,
                                        font=font)
 
-    def update_lives_text(self):
-        text = 'Lives: %s' % self.lives
-        if self.hud is None:
-            self.hud = self.draw_text(50, 20, text, 15)
+    def update_score_text(self):
+        if self.hud_score is None:
+            self.hud_score = self.draw_text(200, 20, f'Score: {self.score}', 15)
         else:
-            self.canvas.itemconfig(self.hud, text=text)
+            self.canvas.itemconfig(self.hud_score, text=f'Score: {self.score}')
+
+    def update_score(self, points):
+        self.score += points
+        self.update_score_text()
 
     def start_game(self):
         self.canvas.unbind('<space>')
@@ -229,6 +231,8 @@ class Game(tk.Frame):
                 self.after(1000, self.setup_game)
         else:
             self.ball.update()
+            for item in self.canvas.find_withtag('coin'):
+                self.items[item].update()
             self.after(50, self.game_loop)
 
     def check_collisions(self):
@@ -237,7 +241,18 @@ class Game(tk.Frame):
         objects = [self.items[x] for x in items if x in self.items]
         self.ball.collide(objects)
 
-
+        paddle_coords = self.paddle.get_position()
+        for item in self.canvas.find_withtag('coin'):
+            coin = self.items.get(item)
+            if coin:
+                coin_coords = coin.get_position()
+                if (
+                    paddle_coords[0] < coin_coords[2]
+                    and paddle_coords[2] > coin_coords[0]
+                    and paddle_coords[1] < coin_coords[3]
+                ):
+                    self.update_score(1)
+                    coin.delete()
 
 if __name__ == '__main__':
     root = tk.Tk()
