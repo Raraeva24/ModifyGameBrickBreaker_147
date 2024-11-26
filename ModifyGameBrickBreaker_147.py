@@ -1,4 +1,5 @@
 import tkinter as tk
+import random
 
 
 class GameObject(object):
