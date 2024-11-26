@@ -20,11 +20,14 @@ class Ball(GameObject):
     def __init__(self, canvas, x, y):
         self.radius = 10
         self.direction = [1, -1]
-        # increase the below value to increase the speed of ball
-        self.speed = 5
-        item = canvas.create_oval(x-self.radius, y-self.radius,
-                                  x+self.radius, y+self.radius,
-                                  fill='white')
+        self.speed = 10
+        item = canvas.create_oval(
+            x - self.radius,
+            y - self.radius,
+            x + self.radius,
+            y + self.radius,
+            fill='white'
+        )
         super(Ball, self).__init__(canvas, item)
 
     def update(self):
@@ -63,13 +66,15 @@ class Paddle(GameObject):
         self.width = 80
         self.height = 10
         self.ball = None
-        item = canvas.create_rectangle(x - self.width / 2,
-                                       y - self.height / 2,
-                                       x + self.width / 2,
-                                       y + self.height / 2,
-                                       fill='#FFB643')
+        item = canvas.create_rectangle(
+            x - self.width / 2,
+            y - self.height / 2,
+            x + self.width / 2,
+            y + self.height / 2,
+            fill='#ffd500'
+        )
         super(Paddle, self).__init__(canvas, item)
-
+        
     def set_ball(self, ball):
         self.ball = ball
 
