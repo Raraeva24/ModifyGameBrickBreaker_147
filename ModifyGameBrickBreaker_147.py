@@ -74,7 +74,7 @@ class Paddle(GameObject):
             fill='#ffd500'
         )
         super(Paddle, self).__init__(canvas, item)
-        
+
     def set_ball(self, ball):
         self.ball = ball
 
@@ -88,12 +88,13 @@ class Paddle(GameObject):
 
 
 class Brick(GameObject):
-    COLORS = {1: '#4535AA', 2: '#ED639E', 3: '#8FE1A2'}
+    COLORS = {1: '#C98DAC', 2: '#75425C', 3: '#4A2B46'}
 
-    def __init__(self, canvas, x, y, hits):
+    def __init__(self, canvas, x, y, hits, game):
         self.width = 75
         self.height = 20
         self.hits = hits
+        self.game = game
         color = Brick.COLORS[hits]
         item = canvas.create_rectangle(x - self.width / 2,
                                        y - self.height / 2,
@@ -109,7 +110,42 @@ class Brick(GameObject):
         else:
             self.canvas.itemconfig(self.item,
                                    fill=Brick.COLORS[self.hits])
+    def drop_coin(self):
+        coords = self.get_position()
+        x = (coords[0] + coords[2]) / 2
+        y = coords[3]
+        coin = Coin(self.canvas, x, y, self.game)
+        self.game.items[coin.item] = coin
 
+    def create_sparks(self):
+        coords = self.get_position()
+        x = (coords[0] + coords[2]) / 2
+        y = (coords[1] + coords[3]) / 2
+        for _ in range(10):
+            spark_x = x + random.randint(-10, 10)
+            spark_y = y + random.randint(-10, 10)
+            spark = self.canvas.create_oval(
+                spark_x - 2, spark_y - 2,
+                spark_x + 2, spark_y + 2,
+                fill='red', tags='spark'
+            )
+            self.canvas.after(200, lambda item=spark: self.canvas.delete(item))
+
+class Coin(GameObject):
+    def __init__(self, canvas, x, y, game):
+        self.game = game
+        self.width = 15
+        self.height = 15
+        item = canvas.create_oval(
+            x - self.width / 2, y - self.height / 2,
+            x + self.width / 2, y + self.height / 2,
+            fill='gold', tags='coin'
+        )
+        super(Coin, self).__init__(canvas, item)
+    def update(self):
+        self.move(0, 5)
+        if self.get_position()[3] > self.game.height:
+            self.delete()
 
 class Game(tk.Frame):
     def __init__(self, master):
